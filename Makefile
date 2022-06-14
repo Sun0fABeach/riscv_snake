@@ -2,7 +2,6 @@ CC := riscv64-elf-gcc
 CFLAGS := -march=rv32i -mabi=ilp32
 LDFLAGS := -nostdlib -T emulsiv.ld
 LIBS := $(patsubst lib/%.s,lib/%.o,$(wildcard lib/*.s))
-OBJECTS := startup.o snake.o $(LIBS)
 TEST_TARGETS := $(patsubst test/%.s,test_%,$(wildcard test/*.s))
 
 # disable weird intermediate prerequisite auto deletion behavior
@@ -15,7 +14,7 @@ $(TEST_TARGETS): test_%: test_%.hex
 %.hex: %.elf
 	riscv64-unknown-elf-objcopy -O ihex $< $@
 
-snake.elf: $(OBJECTS)
+snake.elf: startup.o snake.o $(LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 test_%.elf: startup.o lib/%.o test/%.o

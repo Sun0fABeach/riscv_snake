@@ -1,6 +1,8 @@
     .section vectors, "x"
 
+    .extern input_handler
     .global __reset
+
 __reset:
     j start
 
@@ -12,6 +14,7 @@ __irq:
 
     .weak irq_handler
 irq_handler:
+    call input_handler
     mret
 
 start:
