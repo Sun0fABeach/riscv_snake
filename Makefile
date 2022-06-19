@@ -17,7 +17,7 @@ $(TEST_TARGETS): test_%: test_%.hex
 snake.elf: startup.o snake.o $(LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-test_%.elf: startup.o lib/%.o test/%.o
+test_%.elf: startup.o test/%.o $(LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 %.o: %.s

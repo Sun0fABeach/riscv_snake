@@ -14,7 +14,11 @@ __irq:
 
     .weak irq_handler
 irq_handler:
+    addi sp, sp, -4
+    sw ra, 0(sp)
     call input_handler
+    lw ra, 0(sp)
+    addi sp, sp, 4
     mret
 
 start:

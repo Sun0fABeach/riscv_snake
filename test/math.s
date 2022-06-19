@@ -1,6 +1,6 @@
-.global main
-.extern mult
-.extern div
+    .global main
+    .extern mult
+    .extern div
 
 main:
     mv s11, ra
