@@ -1,12 +1,11 @@
-.global mult
-.global div
+    .global mult
+    .global div
 
 # signed multiplication using the shift-add algorithm
 # a0 is multiplicand
 # a1 is multiplier
 # t0 is product
 # product placed in a0
-
 mult:
     li t0, 0
 mult_loop:
@@ -30,7 +29,6 @@ mult_done:
 # a1 is divisor
 # quotient placed in a0
 # remainder placed in a1
-
 div:
   li t0, 0
   beq a1, x0, div_done
