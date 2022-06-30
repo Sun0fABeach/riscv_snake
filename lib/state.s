@@ -82,13 +82,15 @@ move_up:
     call read_head
     mv s0, a0
     mv s1, a1
-    beqz a1, move_up_collision
+    beqz a1, move_up_collision # border collision
+    li t0, down
+    beq a2, t0, move_up_done # disallow moving in opposite direction
     li a2, up
-    call map_write
-    addi s1, s1, -1
+    call map_write # write direction to current map pos
     mv a0, s0
-    mv a1, s1
-    call write_head
+    addi a1, s1, -1
+    li a2, up
+    call write_head # save current coords and direction
     li a2, snake_color
     call draw_pixel
 # tail movement
@@ -115,11 +117,13 @@ move_right:
     mv s1, a1
     li t0, 31
     beq a0, t0, move_right_collision
+    li t0, left
+    beq a2, t0, move_left_done
     li a2, right
     call map_write
-    addi s0, s0, 1
-    mv a0, s0
+    addi a0, s0, 1
     mv a1, s1
+    li a2, right
     call write_head
     li a2, snake_color
     call draw_pixel
@@ -147,11 +151,13 @@ move_down:
     mv s1, a1
     li t0, 31
     beq a1, t0, move_down_collision
+    li t0, up
+    beq a2, t0, move_down_done
     li a2, down
     call map_write
-    addi s1, s1, 1
     mv a0, s0
-    mv a1, s1
+    addi a1, s1, 1
+    li a2, down
     call write_head
     li a2, snake_color
     call draw_pixel
@@ -178,11 +184,13 @@ move_left:
     mv s0, a0
     mv s1, a1
     beqz a0, move_left_collision
+    li t0, right
+    beq a2, t0, move_left_done
     li a2, left
     call map_write
-    addi s0, s0, -1
-    mv a0, s0
+    addi a0, s0, -1
     mv a1, s1
+    li a2, left
     call write_head
     li a2, snake_color
     call draw_pixel
@@ -246,6 +254,7 @@ read_head:
     la t0, head
     lbu a0, 0(t0)
     lbu a1, 1(t0)
+    lbu a2, 2(t0)
     ret
 
 read_tail:
@@ -258,6 +267,7 @@ write_head:
     la t0, head
     sb a0, 0(t0)
     sb a1, 1(t0)
+    sb a2, 2(t0)
     ret
 
 write_tail:
@@ -270,7 +280,7 @@ write_tail:
     .data
 # current x/y of snake head
 head:
-    .zero 2
+    .zero 3
 # current x/y of snake tail
 tail:
     .zero 2
