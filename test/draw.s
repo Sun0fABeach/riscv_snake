@@ -2,6 +2,7 @@
 .extern input_init
 .extern input_val
 .extern draw_pixel
+.extern read_pixel
 .extern draw_clear
 
 .equ input_up, 0x00000040
@@ -39,6 +40,10 @@ draw_input_check_up:
     li a0, 16
     li a1, 8
     call draw_pixel
+    li a0, 16
+    li a1, 8
+    call read_pixel
+    mv x31, a0
     j draw_input_done
 draw_input_check_right:
     li t1, input_right
@@ -46,6 +51,10 @@ draw_input_check_right:
     li a0, 24
     li a1, 16
     call draw_pixel
+    li a0, 24
+    li a1, 16
+    call read_pixel
+    mv x31, a0
     j draw_input_done
 draw_input_check_down:
     li t1, input_down
@@ -53,6 +62,10 @@ draw_input_check_down:
     li a0, 16
     li a1, 24
     call draw_pixel
+    li a0, 16
+    li a1, 24
+    call read_pixel
+    mv x31, a0
     j draw_input_done
 draw_input_check_left:
     li t1, input_left
@@ -60,6 +73,10 @@ draw_input_check_left:
     li a0, 8
     li a1, 16
     call draw_pixel
+    li a0, 8
+    li a1, 15 # adjacent pixel to test resetting x31
+    call read_pixel
+    mv x31, a0
     j draw_input_done
 draw_input_done:
     lw ra, 0(sp)

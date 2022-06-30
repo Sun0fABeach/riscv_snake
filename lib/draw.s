@@ -1,4 +1,5 @@
 .global draw_pixel
+.global read_pixel
 .global draw_clear
 
 .equ map_start, 0x00000C00
@@ -18,6 +19,19 @@ draw_pixel:
     add t0, t0, a1
 # write pixel
     sb a2, 0(t0)
+    ret
+
+# a0 x coordinate
+# a1 y coordinate
+# returns pixel byte in a0
+read_pixel:
+# calculate byte address
+    slli a1, a1, 5 # *32
+    add a1, a1, a0
+    li t0, map_start
+    add t0, t0, a1
+# read pixel
+    lbu a0, 0(t0)
     ret
 
 draw_clear:
