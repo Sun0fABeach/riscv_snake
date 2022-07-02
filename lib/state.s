@@ -6,6 +6,7 @@
     .global snake_init
 
     .extern draw_pixel
+    .extern read_pixel
     .extern map_init
     .extern map_read
     .extern map_write
@@ -16,7 +17,7 @@
     .equ left, 3
 
     .equ empty_color, 0
-    .equ snake_color, -1
+    .equ snake_color, 0xFF
 
 snake_init:
     addi sp, sp, -4
@@ -24,9 +25,13 @@ snake_init:
 
     call map_init
 
-    li a0, 15
+    li a0, 14
     li a1, 16
     call write_tail
+    li a2, snake_color
+    call draw_pixel
+    li a0, 15
+    li a1, 16
     li a2, snake_color
     call draw_pixel
     li a0, 16
@@ -35,6 +40,7 @@ snake_init:
     call draw_pixel
     li a0, 17
     li a1, 16
+    li a2, right
     call write_head
     li a2, snake_color
     call draw_pixel
@@ -82,9 +88,15 @@ move_up:
     call read_head
     mv s0, a0
     mv s1, a1
-    beqz a1, move_up_collision # border collision
     li t0, down
     beq a2, t0, move_up_done # disallow moving in opposite direction
+    beqz a1, move_up_collision # border collision
+    addi a1, a1, -1
+    call read_pixel
+    li t0, snake_color
+    beq a0, t0, move_up_collision # snake collision
+    mv a0, s0
+    mv a1, s1
     li a2, up
     call map_write # write direction to current map pos
     mv a0, s0
@@ -115,10 +127,16 @@ move_right:
     call read_head
     mv s0, a0
     mv s1, a1
+    li t0, left
+    beq a2, t0, move_right_done
     li t0, 31
     beq a0, t0, move_right_collision
-    li t0, left
-    beq a2, t0, move_left_done
+    addi a0, a0, 1
+    call read_pixel
+    li t0, snake_color
+    beq a0, t0, move_right_collision
+    mv a0, s0
+    mv a1, s1
     li a2, right
     call map_write
     addi a0, s0, 1
@@ -149,10 +167,16 @@ move_down:
     call read_head
     mv s0, a0
     mv s1, a1
-    li t0, 31
-    beq a1, t0, move_down_collision
     li t0, up
     beq a2, t0, move_down_done
+    li t0, 31
+    beq a1, t0, move_down_collision
+    addi a1, a1, 1
+    call read_pixel
+    li t0, snake_color
+    beq a0, t0, move_down_collision
+    mv a0, s0
+    mv a1, s1
     li a2, down
     call map_write
     mv a0, s0
@@ -183,9 +207,15 @@ move_left:
     call read_head
     mv s0, a0
     mv s1, a1
-    beqz a0, move_left_collision
     li t0, right
     beq a2, t0, move_left_done
+    beqz a0, move_left_collision
+    addi a0, a0, -1
+    call read_pixel
+    li t0, snake_color
+    beq a0, t0, move_left_collision
+    mv a0, s0
+    mv a1, s1
     li a2, left
     call map_write
     addi a0, s0, -1

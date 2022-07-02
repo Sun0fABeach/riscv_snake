@@ -6,7 +6,7 @@
 map_init:
     # init map with 15/16 and 16/16, both pointing right
     la t0, map
-    li t1, 0b00000001
+    li t1, 0b00000101
     sb t1, 131(t0)
     li t1, 0b01000000
     sb t1, 132(t0)
