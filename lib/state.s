@@ -7,9 +7,11 @@
 
     .extern draw_pixel
     .extern read_pixel
+    .extern draw_clear
     .extern map_init
     .extern map_read
     .extern map_write
+    .extern map_clear
 
     .equ up, 0
     .equ right, 1
@@ -22,6 +24,8 @@
 snake_init:
     addi sp, sp, -4
     sw ra, 0(sp)
+
+    call snake_clear
 
     call map_init
 
@@ -47,6 +51,15 @@ snake_init:
 
     lw ra, 0(sp)
     addi sp, sp, 4
+    ret
+
+snake_clear:
+    add sp, sp, -4
+    sw ra, 0(sp)
+    call map_clear
+    call draw_clear
+    lw ra, 0(sp)
+    add sp, sp, 4
     ret
 
 # a0 direction

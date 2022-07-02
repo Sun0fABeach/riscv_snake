@@ -5,7 +5,7 @@
 
 .equ gpio_base_addr, 0xD0000000
 .equ gpio_direction_mask, 0x00FFFFFF
-.equ gpio_interrupt_enable, 0x0040A040
+.equ gpio_interrupt_enable, 0x0040A041
 
 gpio_init:
     li t0, gpio_base_addr
@@ -28,9 +28,9 @@ gpio_input_handler:
     beqz s1, gpio_input_handler_done
     la s2, gpio_input_val
     sw s1, 0(s2)
-    sw x0, 0x8(s0)
+    sw zero, 0x8(s0)
 gpio_input_handler_done:
-    sw x0, 0xC(s0)
+    sw zero, 0xC(s0)
 
     lw s0, 0(sp)
     lw s1, 4(sp)

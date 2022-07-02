@@ -1,6 +1,7 @@
     .global map_init
     .global map_read
     .global map_write
+    .global map_clear
     .extern div
 
 map_init:
@@ -59,6 +60,15 @@ map_write:
     addi sp, sp, 5
     ret
 
+
+map_clear:
+    la t0, map
+    addi t1, t0, 256
+map_clear_loop:
+    sw zero, 0(t0)
+    addi t0, t0, 8
+    bltu t0, t1, map_clear_loop
+    ret
 
 # a0: x
 # a1: y
