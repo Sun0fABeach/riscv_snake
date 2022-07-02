@@ -1,6 +1,6 @@
 .global main
-.extern input_init
-.extern input_val
+.extern gpio_init
+.extern gpio_input_val
 .extern draw_pixel
 .extern read_pixel
 .extern draw_clear
@@ -12,9 +12,9 @@
 
 main:
     mv s0, ra
-    call input_init
+    call gpio_init
 main_loop:
-    la t0, input_val
+    la t0, gpio_input_val
     lw a0, 0(t0)
     beqz a0, main_loop
     sw x0, 0(t0)

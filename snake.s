@@ -1,7 +1,7 @@
     .global main
     .extern snake_init
-    .extern input_init
-    .extern input_val
+    .extern gpio_init
+    .extern gpio_input_val
     .extern move_up
     .extern move_right
     .extern move_down
@@ -16,9 +16,9 @@ main:
     addi sp, sp, -4
     sw ra, 0(sp)
     call snake_init
-    call input_init
+    call gpio_init
 main_loop:
-    la t0, input_val
+    la t0, gpio_input_val
     lw a0, 0(t0)
     beqz a0, main_loop
     sw x0, 0(t0)

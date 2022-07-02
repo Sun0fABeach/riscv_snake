@@ -1,6 +1,6 @@
     .section vectors, "x"
 
-    .extern input_handler
+    .extern gpio_input_handler
     .global __reset
 
 __reset:
@@ -16,7 +16,7 @@ __irq:
 irq_handler:
     addi sp, sp, -4
     sw ra, 0(sp)
-    call input_handler
+    call gpio_input_handler
     lw ra, 0(sp)
     addi sp, sp, 4
     mret
