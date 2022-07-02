@@ -1,12 +1,16 @@
 .global gpio_init
 .global gpio_input_handler
 .global gpio_input_val
+.global gpio_set_led
 
 .equ gpio_base_addr, 0xD0000000
+.equ gpio_direction_mask, 0x00FFFFFF
 .equ gpio_interrupt_enable, 0x0040A040
 
 gpio_init:
     li t0, gpio_base_addr
+    li t1, gpio_direction_mask
+    sw t1, 0(t0)
     li t1, gpio_interrupt_enable
     sw t1, 4(t0)
     ret
@@ -32,6 +36,18 @@ gpio_input_handler_done:
     lw s1, 4(sp)
     lw s2, 8(sp)
     addi sp, sp, 12
+    ret
+
+# a0: led on/off (1/0)
+gpio_set_led:
+    li t0, gpio_base_addr
+    beqz a0, gpio_set_led_off
+    li t1, 0x01000000
+    j gpio_set_led_write
+gpio_set_led_off:
+    li t1, 0x00000000
+gpio_set_led_write:
+    sw t1, 0x10(t0)
     ret
 
     .data

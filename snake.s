@@ -2,6 +2,7 @@
     .extern snake_init
     .extern gpio_init
     .extern gpio_input_val
+    .extern gpio_set_led
     .extern move_up
     .extern move_right
     .extern move_down
@@ -15,21 +16,27 @@
 main:
     addi sp, sp, -4
     sw ra, 0(sp)
+
     call snake_init
     call gpio_init
+    li a0, 1
+    call gpio_set_led
 main_loop:
     la t0, gpio_input_val
     lw a0, 0(t0)
     beqz a0, main_loop
-    sw x0, 0(t0)
+    sw zero, 0(t0)
     call main_move
-    j main_loop
+    beqz a0, main_loop
+    li a0, 0
+    call gpio_set_led
 
     lw ra, 0(sp)
     addi sp, sp, 4
     ret
 
 # a0 input word
+# retuns collision (0/1) in a0
 main_move:
     addi sp, sp, -4
     sw ra, 0(sp)
@@ -50,8 +57,11 @@ main_move_check_down:
     j main_move_done
 main_move_check_left:
     li t0, input_left
-    bne t0, a0, main_move_done
+    bne t0, a0, main_move_none
     call move_left
+    j main_move_done
+main_move_none:
+    li a0, 0 # return non-collision value
 main_move_done:
     lw ra, 0(sp)
     addi sp, sp, 4
