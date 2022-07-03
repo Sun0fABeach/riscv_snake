@@ -46,9 +46,20 @@ main_check_collision:
     bne a0, t0, main_loop
     li a0, 0
     call gpio_set_led
+    call game_over_wait
+    j main_init
 main_done:
     lw ra, 0(sp)
     addi sp, sp, 4
+    ret
+
+game_over_wait:
+    la t0, gpio_input_val
+    li t1, input_reset
+game_over_wait_loop:
+    lw t2, 0(t0)
+    bne t1, t2, game_over_wait_loop
+    sw zero, 0(t0)
     ret
 
 # a0 input word
