@@ -1,9 +1,10 @@
+    .global snake_init
     .global move
     .global move_up
     .global move_right
     .global move_down
     .global move_left
-    .global snake_init
+    .global move_tail
 
     .extern draw_pixel
     .extern read_pixel
@@ -12,6 +13,7 @@
     .extern map_read
     .extern map_write
     .extern map_clear
+    .extern has_food
 
     .equ up, 0
     .equ right, 1
@@ -20,6 +22,10 @@
 
     .equ empty_color, 0
     .equ snake_color, 0xFF
+
+    .equ move_result_none, 0
+    .equ move_result_collision, 1
+    .equ move_result_eaten, 2
 
 snake_init:
     addi sp, sp, -4
@@ -91,23 +97,23 @@ move_done:
     addi sp, sp, 4
     ret
 
-# returns collision 0/1 in a0
+# returns move result in a0
 move_up:
     addi sp, sp, -12
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
-# head movement
+
     call read_head
     mv s0, a0
     mv s1, a1
     li t0, down
-    beq a2, t0, move_up_done # disallow moving in opposite direction
-    beqz a1, move_up_collision # border collision
+    beq a2, t0, move_finish_done # disallow moving in opposite direction
+    beqz a1, move_finish_collision # border collision
     addi a1, a1, -1
     call read_pixel
     li t0, snake_color
-    beq a0, t0, move_up_collision # snake collision
+    beq a0, t0, move_finish_collision # snake collision
     mv a0, s0
     mv a1, s1
     li a2, up
@@ -118,18 +124,11 @@ move_up:
     call write_head # save current coords and direction
     li a2, snake_color
     call draw_pixel
-# tail movement
-    call move_tail
-    li a0, 0
-    j move_up_done
-move_up_collision:
-    li a0, 1
-move_up_done:
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
-    ret
+    mv a0, s0 # check if food eaten
+    addi a1, s1, -1
+    call has_food
+    bnez a0, move_finish_eaten
+    j move_finish_none
 
 move_right:
     addi sp, sp, -12
@@ -141,13 +140,13 @@ move_right:
     mv s0, a0
     mv s1, a1
     li t0, left
-    beq a2, t0, move_right_done
+    beq a2, t0, move_finish_done
     li t0, 31
-    beq a0, t0, move_right_collision
+    beq a0, t0, move_finish_collision
     addi a0, a0, 1
     call read_pixel
     li t0, snake_color
-    beq a0, t0, move_right_collision
+    beq a0, t0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, right
@@ -158,18 +157,11 @@ move_right:
     call write_head
     li a2, snake_color
     call draw_pixel
-# tail movement
-    call move_tail
-    li a0, 0
-    j move_right_done
-move_right_collision:
-    li a0, 1
-move_right_done:
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
-    ret
+    addi a0, s0, 1
+    mv a1, s1
+    call has_food
+    bnez a0, move_finish_eaten
+    j move_finish_none
 
 move_down:
     addi sp, sp, -12
@@ -181,13 +173,13 @@ move_down:
     mv s0, a0
     mv s1, a1
     li t0, up
-    beq a2, t0, move_down_done
+    beq a2, t0, move_finish_done
     li t0, 31
-    beq a1, t0, move_down_collision
+    beq a1, t0, move_finish_collision
     addi a1, a1, 1
     call read_pixel
     li t0, snake_color
-    beq a0, t0, move_down_collision
+    beq a0, t0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, down
@@ -198,18 +190,11 @@ move_down:
     call write_head
     li a2, snake_color
     call draw_pixel
-# tail movement
-    call move_tail
-    li a0, 0
-    j move_down_done
-move_down_collision:
-    li a0, 1
-move_down_done:
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
-    ret
+    mv a0, s0
+    addi a1, s1, 1
+    call has_food
+    bnez a0, move_finish_eaten
+    j move_finish_none
 
 move_left:
     addi sp, sp, -12
@@ -221,12 +206,12 @@ move_left:
     mv s0, a0
     mv s1, a1
     li t0, right
-    beq a2, t0, move_left_done
-    beqz a0, move_left_collision
+    beq a2, t0, move_finish_done
+    beqz a0, move_finish_collision
     addi a0, a0, -1
     call read_pixel
     li t0, snake_color
-    beq a0, t0, move_left_collision
+    beq a0, t0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, left
@@ -237,13 +222,22 @@ move_left:
     call write_head
     li a2, snake_color
     call draw_pixel
-# tail movement
-    call move_tail
-    li a0, 0
-    j move_left_done
-move_left_collision:
-    li a0, 1
-move_left_done:
+    addi a0, s0, -1
+    mv a1, s1
+    call has_food
+    bnez a0, move_finish_eaten
+    j move_finish_none
+
+# final instructions for all move_dir routines
+move_finish_none:
+    li a0, move_result_none
+    j move_finish_done
+move_finish_collision:
+    li a0, move_result_collision
+    j move_finish_done
+move_finish_eaten:
+    li a0, move_result_eaten
+move_finish_done:
     lw ra, 0(sp)
     lw s0, 4(sp)
     lw s1, 8(sp)
@@ -291,7 +285,6 @@ move_tail_check_done:
     lw s1, 8(sp)
     addi sp, sp, 12
     ret
-
 
 read_head:
     la t0, head
