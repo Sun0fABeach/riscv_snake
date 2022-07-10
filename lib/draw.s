@@ -6,7 +6,6 @@
 .equ map_end, 0x00000FFF
 
 .equ black, 0
-.equ white, -1
 
 # a0 x coordinate
 # a1 y coordinate

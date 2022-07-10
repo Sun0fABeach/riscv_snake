@@ -9,6 +9,7 @@
     .extern move_left
     .extern move_tail
     .extern place_food
+    .extern reset_food
 
     .equ input_up, 0x00000040
     .equ input_right, 0x00002000
@@ -37,6 +38,7 @@ main_init:
     li a0, 1
     call gpio_set_led
     call snake_init
+    call reset_food
     call place_food
 main_loop:
     la t0, gpio_input_val
@@ -67,6 +69,8 @@ main_check_eaten:
     xori t0, t0, 1
     la t1, ate_last_move
     sb t0, 0(t1)
+    beqz t0, main_loop
+    call place_food
     j main_loop
 main_done:
     lw ra, 0(sp)
@@ -84,7 +88,7 @@ game_over_wait_loop:
     ret
 
 # a0 input word
-# retuns action result in a0
+# returns action result in a0
 main_handle_input:
     addi sp, sp, -4
     sw ra, 0(sp)
