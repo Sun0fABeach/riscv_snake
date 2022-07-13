@@ -1,7 +1,7 @@
 ENTRY(__reset)
 
 MEM_SIZE    = 4K;
-STACK_SIZE  = 512;
+STACK_SIZE  = 256;
 BITMAP_SIZE = 1K;
 
 SECTIONS {

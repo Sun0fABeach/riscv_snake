@@ -97,13 +97,16 @@ move_done:
     addi sp, sp, 4
     ret
 
+# a0: whether tail won't move
 # returns move result in a0
 move_up:
-    addi sp, sp, -12
+    addi sp, sp, -16
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
+    sw s2, 12(sp)
 
+    mv s2, a0
     call read_head
     mv s0, a0
     mv s1, a1
@@ -111,9 +114,9 @@ move_up:
     beq a2, t0, move_finish_done # disallow moving in opposite direction
     beqz a1, move_finish_collision # border collision
     addi a1, a1, -1
-    call read_pixel
-    li t0, snake_color
-    beq a0, t0, move_finish_collision # snake collision
+    mv a2, s2
+    call check_self_collision
+    bnez a0, move_finish_collision # snake self collision
     mv a0, s0
     mv a1, s1
     li a2, up
@@ -131,11 +134,13 @@ move_up:
     j move_finish_none
 
 move_right:
-    addi sp, sp, -12
+    addi sp, sp, -16
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
-# head movement
+    sw s2, 12(sp)
+
+    mv s2, a0
     call read_head
     mv s0, a0
     mv s1, a1
@@ -144,9 +149,9 @@ move_right:
     li t0, 31
     beq a0, t0, move_finish_collision
     addi a0, a0, 1
-    call read_pixel
-    li t0, snake_color
-    beq a0, t0, move_finish_collision
+    mv a2, s2
+    call check_self_collision
+    bnez a0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, right
@@ -164,11 +169,13 @@ move_right:
     j move_finish_none
 
 move_down:
-    addi sp, sp, -12
+    addi sp, sp, -16
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
-# head movement
+    sw s2, 12(sp)
+
+    mv s2, a0
     call read_head
     mv s0, a0
     mv s1, a1
@@ -177,9 +184,9 @@ move_down:
     li t0, 31
     beq a1, t0, move_finish_collision
     addi a1, a1, 1
-    call read_pixel
-    li t0, snake_color
-    beq a0, t0, move_finish_collision
+    mv a2, s2
+    call check_self_collision
+    bnez a0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, down
@@ -197,11 +204,13 @@ move_down:
     j move_finish_none
 
 move_left:
-    addi sp, sp, -12
+    addi sp, sp, -16
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
-# head movement
+    sw s2, 12(sp)
+
+    mv s2, a0
     call read_head
     mv s0, a0
     mv s1, a1
@@ -209,9 +218,9 @@ move_left:
     beq a2, t0, move_finish_done
     beqz a0, move_finish_collision
     addi a0, a0, -1
-    call read_pixel
-    li t0, snake_color
-    beq a0, t0, move_finish_collision
+    mv a2, s2
+    call check_self_collision
+    bnez a0, move_finish_collision
     mv a0, s0
     mv a1, s1
     li a2, left
@@ -241,7 +250,41 @@ move_finish_done:
     lw ra, 0(sp)
     lw s0, 4(sp)
     lw s1, 8(sp)
-    addi sp, sp, 12
+    lw s2, 12(sp)
+    addi sp, sp, 16
+    ret
+
+# a0/a1: x/y of move target
+# a2: whether tail won't move
+# returns collision result of snake with itself (0/1) in a0
+check_self_collision:
+    addi sp, sp, -16
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+    call read_pixel
+    li t0, snake_color
+    bne a0, t0, check_self_collision_false
+    call read_tail
+    bne a0, s0, check_self_collision_true
+    bne a1, s1, check_self_collision_true
+    beqz s2, check_self_collision_false # hit tail, but it will move
+check_self_collision_true:
+    li a0, 1
+    j check_self_collision_done
+check_self_collision_false:
+    li a0, 0
+check_self_collision_done:
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    lw s2, 12(sp)
+    addi sp, sp, 16
     ret
 
 move_tail:
@@ -253,8 +296,16 @@ move_tail:
     call read_tail
     mv s0, a0
     mv s1, a1
+    call read_head
+    bne a0, s0, move_tail_draw_empty
+    bne a1, s1, move_tail_draw_empty
+    j move_tail_check_directions # don't draw empty field if head takes tail pos
+move_tail_draw_empty:
+    mv a0, s0
+    mv a1, s1
     li a2, empty_color
     call draw_pixel
+move_tail_check_directions:
     mv a0, s0
     mv a1, s1
     call map_read
