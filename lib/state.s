@@ -68,35 +68,6 @@ snake_clear:
     add sp, sp, 4
     ret
 
-# a0 direction
-# returns collision 0/1 in a0
-move:
-    addi sp, sp, -4
-    sw ra, 0(sp)
-move_check_up:
-    li t0, up
-    bne a0, t0, move_check_right
-    call move_up
-    j move_done
-move_check_right:
-    li t0, right
-    bne a0, t0, move_check_down
-    call move_right
-    j move_done
-move_check_down:
-    li t0, down
-    bne a0, t0, move_check_left
-    call move_down
-    j move_done
-move_check_left:
-    li t0, left
-    bne a0, t0, move_done
-    call move_left
-move_done:
-    lw ra, 0(sp)
-    addi sp, sp, 4
-    ret
-
 # a0: whether tail won't move
 # returns move result in a0
 move_up:

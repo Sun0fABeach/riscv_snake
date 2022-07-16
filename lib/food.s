@@ -108,8 +108,8 @@ read_placement_write_next_num:
 # each word contains 2 x/y coord pairs for food placement
 # lsb are the lower index
 placements:
-    .word 0x09130913
-    .word 0x1F1F1F1F
+    .word 0x140F0913
+    .word 0x10101508
 placement_num:
     .zero 1
 # current x/y of food

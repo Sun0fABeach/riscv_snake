@@ -22,6 +22,9 @@
     .equ action_result_eaten, 2
     .equ action_result_reset, 3
 
+    .equ move_delay, 3000
+    .equ move_delay_decrement, 125
+
 main:
     addi sp, sp, -8
     sw ra, 0(sp)
@@ -35,24 +38,40 @@ main_init:
     sb zero, 0(t0)
     la t0, gpio_input_val
     sw zero, 0(t0) # flush inputs entered before program start
+    la t0, direction_input
+    li t1, input_right
+    sw t1, 0(t0) # snake starts out moving to the right
+    la t0, current_delay
+    li t1, move_delay
+    sh t1, 0(t0)
     li a0, 1
     call gpio_set_led
     call snake_init
     call reset_food
     call place_food
 main_loop:
+    la t0, current_delay
+    lhu t0, 0(t0)
+    li t1, 0 # delay counter
+    j main_loop_delay_wait_check
+main_loop_delay_wait:
+    addi t1, t1, 1
+main_loop_delay_wait_check:
+    bne t1, t0, main_loop_delay_wait
     la t0, gpio_input_val
     lw a0, 0(t0)
-    beqz a0, main_loop
-    sw zero, 0(t0)
+    beqz a0, main_do_move
+    li t0, input_reset
+    beq a0, t0, main_init
+    la t0, direction_input
+    sw a0, 0(t0) # write current input
+main_do_move:
+    la t0, direction_input
+    lw a0, 0(t0)
     la t0, ate_last_move
     lbu a1, 0(t0)
-    call main_handle_input
+    call execute_move
     mv s0, a0
-main_check_reset:
-    li t0, action_result_reset
-    bne s0, t0, main_check_collision
-    j main_init
 main_check_collision:
     li t0, action_result_collision
     bne s0, t0, main_check_move_tail
@@ -72,7 +91,9 @@ main_check_eaten:
     la t1, ate_last_move
     sb t0, 0(t1)
     beqz t0, main_loop
+    call increment_score
     call place_food
+    call reduce_delay
     j main_loop
 main_done:
     lw ra, 0(sp)
@@ -80,51 +101,37 @@ main_done:
     addi sp, sp, 8
     ret
 
-game_over_wait:
-    la t0, gpio_input_val
-    li t1, input_reset
-game_over_wait_loop:
-    lw t2, 0(t0)
-    bne t1, t2, game_over_wait_loop
-    sw zero, 0(t0)
-    ret
-
 # a0 input word
 # a1 whether snake ate last move
 # returns action result in a0
-main_handle_input:
+execute_move:
     addi sp, sp, -4
     sw ra, 0(sp)
     mv t0, a0
     mv a0, a1
-main_handle_input_check_move_up:
+execute_move_check_up:
     li t1, input_up
-    bne t1, t0, main_handle_input_check_move_right
+    bne t1, t0, execute_move_check_right
     call move_up
-    j main_handle_input_done
-main_handle_input_check_move_right:
+    j execute_move_done
+execute_move_check_right:
     li t1, input_right
-    bne t1, t0, main_handle_input_check_move_down
+    bne t1, t0, execute_move_check_down
     call move_right
-    j main_handle_input_done
-main_handle_input_check_move_down:
+    j execute_move_done
+execute_move_check_down:
     li t1, input_down
-    bne t1, t0, main_handle_input_check_move_left
+    bne t1, t0, execute_move_check_left
     call move_down
-    j main_handle_input_done
-main_handle_input_check_move_left:
+    j execute_move_done
+execute_move_check_left:
     li t1, input_left
-    bne t1, t0, main_handle_input_check_reset
+    bne t1, t0, execute_move_none
     call move_left
-    j main_handle_input_done
-main_handle_input_check_reset:
-    li t1, input_reset
-    bne t1, t0, main_handle_input_none
-    li a0, action_result_reset
-    j main_handle_input_done
-main_handle_input_none:
+    j execute_move_done
+execute_move_none:
     li a0, action_result_none
-main_handle_input_done:
+execute_move_done:
     lw ra, 0(sp)
     addi sp, sp, 4
     ret
@@ -136,9 +143,31 @@ increment_score:
     sh t1, 0(t0)
     ret
 
+reduce_delay:
+    la t0, current_delay
+    lhu t1, 0(t0)
+    beqz t1, reduce_delay_done
+    li t2, move_delay_decrement
+    sub t1, t1, t2
+    sh t1, 0(t0)
+reduce_delay_done:
+    ret
+
+game_over_wait:
+    la t0, gpio_input_val
+    li t1, input_reset
+game_over_wait_loop:
+    lw t2, 0(t0)
+    bne t1, t2, game_over_wait_loop
+    ret
+
     .data
 
-score:
+direction_input:
+    .word 1
+current_delay:
     .zero 2
 ate_last_move:
     .zero 1
+score:
+    .zero 2
