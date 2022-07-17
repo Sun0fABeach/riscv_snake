@@ -10,6 +10,9 @@
     .extern move_tail
     .extern place_food
     .extern reset_food
+    .extern text_title
+    .extern text_start
+    .extern text_game_over
 
     .equ input_up, 0x00000040
     .equ input_right, 0x00002000
@@ -31,6 +34,7 @@ main:
     sw s0, 4(sp)
 
     call gpio_init
+    call text_title
 main_init:
     la t0, score
     sh zero, 0(t0)
@@ -49,6 +53,7 @@ main_init:
     call snake_init
     call reset_food
     call place_food
+    call text_start
 main_loop:
     la t0, current_delay
     lhu t0, 0(t0)
@@ -77,6 +82,7 @@ main_check_collision:
     bne s0, t0, main_check_move_tail
     li a0, 0
     call gpio_set_led
+    call text_game_over
     call game_over_wait
     j main_init
 main_check_move_tail:
