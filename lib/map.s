@@ -1,11 +1,11 @@
     .global map_init
     .global map_read
     .global map_write
-    .global map_clear
+#    .global map_clear
     .extern div
 
 map_init:
-    # init map with 15/16 and 16/16, both pointing right
+    # init map with 15/16, 16/16, 17/16, all pointing right
     la t0, map
     li t1, 0b00000101
     sb t1, 131(t0)
@@ -61,14 +61,14 @@ map_write:
     ret
 
 
-map_clear:
-    la t0, map
-    addi t1, t0, 256
-map_clear_loop:
-    sw zero, 0(t0)
-    addi t0, t0, 8
-    bltu t0, t1, map_clear_loop
-    ret
+#map_clear:
+#    la t0, map
+#    addi t1, t0, 256
+#map_clear_loop:
+#    sw zero, 0(t0)
+#    addi t0, t0, 8
+#    bltu t0, t1, map_clear_loop
+#    ret
 
 # a0: x
 # a1: y

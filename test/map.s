@@ -2,7 +2,6 @@
     .extern map_init
     .extern map_read
     .extern map_write
-    .extern div
 
     .equ up, 0
     .equ right, 1

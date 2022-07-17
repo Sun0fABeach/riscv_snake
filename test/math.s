@@ -1,27 +1,27 @@
     .global main
-    .extern mult
+#    .extern mult
     .extern div
 
 main:
     mv s11, ra
 
 #mult
-    li a0, 2
-    li a1, 3
-    jal mult
-    mv s0, a0
-    li a0, 5
-    li a1, -7
-    jal mult
-    mv s1, a0
-    li a0, -5
-    li a1, 7
-    jal mult
-    mv s2, a0
-    li a0, -5
-    li a1, -7
-    jal mult
-    mv s3, a0
+#    li a0, 2
+#    li a1, 3
+#    jal mult
+#    mv s0, a0
+#    li a0, 5
+#    li a1, -7
+#    jal mult
+#    mv s1, a0
+#    li a0, -5
+#    li a1, 7
+#    jal mult
+#    mv s2, a0
+#    li a0, -5
+#    li a1, -7
+#    jal mult
+#    mv s3, a0
 
 #div
     li a0, 10
