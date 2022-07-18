@@ -1,6 +1,9 @@
     .global text_title
     .global text_start
     .global text_game_over
+    .global text_score
+
+    .extern div
 
     .equ text_out, 0xC0000000
 
@@ -26,6 +29,46 @@ text_game_over:
     mv ra, t6
     ret
 
+# a0: score to display
+text_score:
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+
+    mv s0, a0
+    la a0, score
+    call write_text
+    mv a0, s0
+    li a1, 100
+    bltu a0, a1, text_score_check_tens
+    call div
+    call write_integer
+    mv a0, a1
+    li a1, 10
+    j text_score_write_tens
+text_score_check_tens:
+    li a1, 10
+    bltu a0, a1, text_score_write_ones
+text_score_write_tens:
+    call div
+    call write_integer
+    mv a0, a1
+text_score_write_ones:
+    call write_integer
+
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    addi sp, sp, 8
+    ret
+
+# a0: integer to write as ascii char
+write_integer:
+    addi a0, a0, 48
+    li t0, text_out
+    sb a0, 0(t0)
+    ret
+
+# a0: address of string to write
 write_text:
     li t0, text_out
 write_text_loop:
@@ -45,3 +88,5 @@ start:
     .string "\nStart!"
 game_over:
     .string "\nGame Over!"
+score:
+    .string " Score: "

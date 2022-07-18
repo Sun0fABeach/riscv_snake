@@ -13,6 +13,7 @@
     .extern text_title
     .extern text_start
     .extern text_game_over
+    .extern text_score
 
     .equ input_up, 0x00000040
     .equ input_right, 0x00002000
@@ -83,6 +84,9 @@ main_check_collision:
     li a0, 0
     call gpio_set_led
     call text_game_over
+    la t0, score
+    lhu a0, 0(t0)
+    call text_score
     call game_over_wait
     j main_init
 main_check_move_tail:
