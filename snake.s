@@ -69,8 +69,7 @@ main_loop_delay_wait_check:
     beqz a0, main_do_move
     li t0, input_reset
     beq a0, t0, main_init
-    la t0, direction_input
-    sw a0, 0(t0) # write current input
+    call write_direction_input
 main_do_move:
     la t0, direction_input
     lw a0, 0(t0)
@@ -109,6 +108,38 @@ main_done:
     lw ra, 0(sp)
     lw s0, 4(sp)
     addi sp, sp, 8
+    ret
+
+# a0: new direction input
+write_direction_input:
+    la t0, direction_input
+    lw t1, 0(t0) # read old input
+
+    li t2, input_up
+    bne a0, t2, write_direction_input_check_right
+    li t2, input_down
+    bne t1, t2, write_direction_input_save
+    ret
+write_direction_input_check_right:
+    li t2, input_right
+    bne a0, t2, write_direction_input_check_down
+    li t2, input_left
+    bne t1, t2, write_direction_input_save
+    ret
+write_direction_input_check_down:
+    li t2, input_down
+    bne a0, t2, write_direction_input_check_left
+    li t2, input_up
+    bne t1, t2, write_direction_input_save
+    ret
+write_direction_input_check_left:
+    li t2, input_left
+    bne a0, t2, write_direction_input_done
+    li t2, input_right
+    beq t1, t2, write_direction_input_done
+write_direction_input_save:
+    sw a0, 0(t0)
+write_direction_input_done:
     ret
 
 # a0 input word
