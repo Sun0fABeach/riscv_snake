@@ -31,9 +31,9 @@ text_game_over:
 
 # a0: score to display
 text_score:
-    addi sp, sp, -8
-    sw ra, 0(sp)
-    sw s0, 4(sp)
+    # we know write_text, div and write_integer won't use t5 / t6
+    mv t6, ra
+    mv t5, s0
 
     mv s0, a0
     la a0, score
@@ -56,9 +56,8 @@ text_score_write_tens:
 text_score_write_ones:
     call write_integer
 
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    addi sp, sp, 8
+    mv s0, t5
+    mv ra, t6
     ret
 
 # a0: integer to write as ascii char

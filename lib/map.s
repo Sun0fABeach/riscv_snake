@@ -17,8 +17,7 @@ map_init:
 # a1: y
 # returns direction in a0
 map_read:
-    addi sp, sp, -4
-    sw ra, 0(sp)
+    mv t5, ra # we know map_get_pos won't use t5
 
     call map_get_pos
 
@@ -29,19 +28,16 @@ map_read:
     and t0, t0, t1
     srl a0, t0, a1  # grab bit-pair and shift to lsb
 
-    lw ra, 0(sp)
-    addi sp, sp, 4
+    mv ra, t5
     ret
 
 # a0: x
 # a1: y
 # a2: direction to write
 map_write:
-    addi sp, sp, -5
-    sw ra, 0(sp)
-    sb a2, 4(sp)
+    mv t5, ra # we know map_get_pos won't use t5
 
-    call map_get_pos
+    call map_get_pos # won't use a2, so we don't save it
 
     lbu t0, 0(a0)   # load byte from map address
 
@@ -50,14 +46,12 @@ map_write:
     xori t1, t1, -1
     and t0, t0, t1  # set bit-pair to 00
 
-    lbu t1, 4(sp)
-    sll t1, t1, a1
-    or t0, t0, t1   # set bit-pair to direction
+    sll a2, a2, a1
+    or t0, t0, a2   # set bit-pair to direction
 
     sb t0, 0(a0)    # write byte to map
 
-    lw ra, 0(sp)
-    addi sp, sp, 5
+    mv ra, t5
     ret
 
 
@@ -75,8 +69,7 @@ map_write:
 # returns byte address in a0
 # returns bit shift amount for addressing bit-pair in a1
 map_get_pos:
-    addi sp, sp, -4
-    sw ra, 0(sp)
+    mv t6, ra # we know div won't use t6
 
     slli a1, a1, 5
     add a0, a0, a1
@@ -90,8 +83,7 @@ map_get_pos:
     sub t1, t1, a1
     slli a1, t1, 1  # bit-pair pos = (3 - rem) * 2
 
-    lw ra, 0(sp)
-    addi sp, sp, 4
+    mv ra, t6
     ret
 
 # 32x32 map containing snake as 2 bit direction fields

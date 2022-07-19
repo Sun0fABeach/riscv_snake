@@ -30,9 +30,8 @@
     .equ move_delay_decrement, 125
 
 main:
-    addi sp, sp, -8
+    addi sp, sp, -4
     sw ra, 0(sp)
-    sw s0, 4(sp)
 
     call gpio_init
     call text_title
@@ -106,8 +105,7 @@ main_check_eaten:
     j main_loop
 main_done:
     lw ra, 0(sp)
-    lw s0, 4(sp)
-    addi sp, sp, 8
+    addi sp, sp, 4
     ret
 
 # a0: new direction input

@@ -193,11 +193,11 @@ move_finish_done:
 # a2: whether tail won't move
 # returns collision result of snake with itself (0/1) in a0
 check_self_collision:
-    addi sp, sp, -16
-    sw ra, 0(sp)
-    sw s0, 4(sp)
-    sw s1, 8(sp)
-    sw s2, 12(sp)
+    # we know read_pixel and read_tail won't use t3-t6
+    mv t6, ra
+    mv t5, s0
+    mv t4, s1
+    mv t3, s2
 
     mv s0, a0
     mv s1, a1
@@ -215,11 +215,10 @@ check_self_collision_true:
 check_self_collision_false:
     li a0, 0
 check_self_collision_done:
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    lw s2, 12(sp)
-    addi sp, sp, 16
+    mv ra, t6
+    mv s0, t5
+    mv s1, t4
+    mv s2, t3
     ret
 
 move_tail:
