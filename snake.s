@@ -27,7 +27,9 @@
     .equ action_result_reset, 3
 
     .equ move_delay, 3000
+    .equ move_delay_reduced_decrement_threshold, 1125
     .equ move_delay_decrement, 125
+    .equ move_delay_decrement_reduced, 75
 
 main:
     addi sp, sp, -4
@@ -187,6 +189,10 @@ reduce_delay:
     lhu t1, 0(t0)
     beqz t1, reduce_delay_done
     li t2, move_delay_decrement
+    li t3, move_delay_reduced_decrement_threshold
+    bgtu t1, t3, reduce_delay_write
+    li t2, move_delay_decrement_reduced
+reduce_delay_write:
     sub t1, t1, t2
     sh t1, 0(t0)
 reduce_delay_done:
