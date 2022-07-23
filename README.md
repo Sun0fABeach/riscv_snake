@@ -1,8 +1,8 @@
 # RISC-V Snake
 
-Play snake on the [emulsiV](<http://tice.sea.eseo.fr/riscv/> "emulsiV") RISC-V microcontroller emulator. Completely written in RISC-V assembly (integer subset RV32I).
+An implementation of the classic game _snake_ on the [emulsiV](<http://tice.sea.eseo.fr/riscv/> "emulsiV") RISC-V microcontroller emulator. Entirely written in RISC-V assembly (integer subset RV32I).
 
-You can either take the direct link or build from source.
+To play, you can either take the direct link or build from source and upload.
 
 ## Direct Link
 
@@ -19,8 +19,23 @@ Play the game preconfigured on the emulator [here](<http://tice.sea.eseo.fr/risc
 ```
 make
 ```
-3. Open [emulsiV](<http://tice.sea.eseo.fr/riscv/> "emulsiV") and upload executable `snake.hex` (button top left).
+3. Open [emulsiV](<http://tice.sea.eseo.fr/riscv/> "emulsiV") and upload executable `snake.hex` by clicking the folder button top left: ![folder](https://user-images.githubusercontent.com/8113158/180611214-6f8428d5-6920-42cd-9ef3-8fa9d964cf38.png)
 
 ## Controls
 
-To start the program, press "Run", top right. Afterwards, you can control the game via the gpio buttons.
+To start the program, press "Run", top right. 
+
+Afterwards, you can control the game via the gpio buttons. They are preconfigured if you follow the direct link. If you've built and uploaded manually, you need to configure them yourself by right-clicking the fields until you have the following layout.
+
+![gpio](https://user-images.githubusercontent.com/8113158/180611145-5773455a-fb3b-4036-a7e9-e19aec77a820.png)
+
+Once the game is running, you can give inputs by left-clicking the buttons.
+
+* the d-pad aligned buttons on the left change the snake's direction
+* the button top right restarts the game
+* the LED bottom right is on as long as the game is running and the player didn't reach game over
+
+The Snake will speed up and grow longer the more food it eats. Hitting the edge of the screen or itself means game over.
+
+### Performance Caveat
+The game speed can vary greatly depending on your CPU speed, browser, and sometimes by pausing / restarting. That is because the implementation simply uses idle CPU cycles to pause between moves.
