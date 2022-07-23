@@ -5,7 +5,7 @@
     .extern read_pixel
 
     .equ food_color, 0x77
-    .equ num_placements, 4 # keep in sync with placement data!
+    .equ num_placements, 28 # keep in sync with placement data!
     .equ screen_dimension, 32
 
 place_food:
@@ -110,6 +110,18 @@ read_placement_write_next_num:
 placements:
     .word 0x140F0913
     .word 0x10101508
+    .word 0x0F0F0505
+    .word 0x1D171F1F
+    .word 0x02080207
+    .word 0x0A13030D
+    .word 0x00000C00
+    .word 0x06060B0B
+    .word 0x1C0A1C07
+    .word 0x011F0E17
+    .word 0x110F0E0E
+    .word 0x03110411
+    .word 0x02021F00
+    .word 0x10101010
 placement_num:
     .zero 1
 # current x/y of food
